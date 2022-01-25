@@ -23,19 +23,24 @@ class WrapperPlugin {
 		this.header = args.hasOwnProperty('header') ? args.header : '';
 		this.footer = args.hasOwnProperty('footer') ? args.footer : '';
 		this.afterOptimizations = args.hasOwnProperty('afterOptimizations') ? !!args.afterOptimizations : false;
+		this.afterProcess = args.hasOwnProperty('afterProcess') ? !!args.afterProcess : false;
 		this.test = args.hasOwnProperty('test') ? args.test : '';
 	}
 
 	apply(compiler) {
 		const header = this.header;
 		const footer = this.footer;
-		const tester = {test: this.test};
+		const tester = { test: this.test };
 
 		compiler.hooks.compilation.tap('WrapperPlugin', (compilation) => {
 			if (this.afterOptimizations) {
 				compilation.hooks.afterOptimizeChunkAssets.tap('WrapperPlugin', (chunks) => {
 					wrapChunks(compilation, chunks, footer, header);
 				});
+			} else if (this.afterProcess) {
+				compilation.hooks.afterProcessAssets.tap('WrapperPlugin', (chunks) => {
+					wrapChunks(compilation, chunks, footer, header);
+				})
 			} else {
 				compilation.hooks.optimizeChunkAssets.tapAsync('WrapperPlugin', (chunks, done) => {
 					wrapChunks(compilation, chunks, footer, header);
